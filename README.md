@@ -1,10 +1,5 @@
 # Basketball Shot Arc Tracker
 
-A CS131 final project that tracks the 2D trajectory of a basketball shot from a
-side-view phone video using **classical computer vision only** — no deep learning.
-
----
-
 ## Project Overview
 
 This project loads short side-view phone videos, extracts frames, detects the
