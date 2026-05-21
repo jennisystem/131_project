@@ -1,0 +1,47 @@
+video:
+  input_path: "data/raw/sample_shot.mp4"
+  output_dir: "outputs/sample_shot"
+  resize_width: 960
+  start_frame: 0
+  end_frame: null
+  frame_stride: 1
+
+roi:
+  use_roi: false
+  x: 0
+  y: 0
+  w: 960
+  h: 540
+
+preprocess:
+  blur_kernel: 5
+  use_median_blur: true
+
+hsv_threshold:
+  # Starting values for orange basketball detection.
+  # Tune these after looking at debug masks.
+  lower: [5, 80, 80]
+  upper: [25, 255, 255]
+
+morphology:
+  open_kernel: 3
+  close_kernel: 7
+
+contour_filter:
+  min_area: 40
+  max_area: 5000
+  min_circularity: 0.35
+
+tracking:
+  max_jump_px: 120
+  allow_missing_frames: true
+  trail_length: 60
+
+fitting:
+  use_ransac: true
+  ransac_iterations: 300
+  ransac_threshold_px: 20
+  min_inliers: 8
+
+visualization:
+  save_debug_every_n_frames: 10
