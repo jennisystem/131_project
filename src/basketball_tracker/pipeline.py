@@ -1,11 +1,9 @@
-"""End-to-end basketball shot tracking pipeline."""
-
+# End-to-end pipeline !
+# load config, run full pipeline, return summary dict
 import json
 from pathlib import Path
-
 import yaml
 from tqdm import tqdm
-
 from .detect import detect_ball_hsv, make_hsv_mask, clean_mask
 from .fit import get_valid_points, fit_parabola_xy, ransac_parabola
 from .metrics import tracking_summary, fit_summary
@@ -19,14 +17,35 @@ def load_config(config_path: str) -> dict:
     with open(config_path) as f:
         return yaml.safe_load(f)
 
+# load config, run full pipeline, return summary dict
+def run_pipeline(
+    config_path: str,
+    video_path: str | None = None,
+    output_dir: str | None = None,
+) -> dict:
+    """Run the pipeline. CLI overrides take precedence over config values.
 
-def run_pipeline(config_path: str) -> dict:
-    """Run the full pipeline and return the summary dict."""
+    Parameters
+    ----------
+    config_path : path to YAML config.
+    video_path  : optional override for video.input_path.
+    output_dir  : optional override for video.output_dir. If not given but
+                  video_path is, defaults to outputs/<video_stem>/.
+    """
     cfg = load_config(config_path)
 
     video_cfg = cfg.get("video", {})
-    input_path = video_cfg.get("input_path", "data/raw/sample_shot.mp4")
-    output_dir = Path(video_cfg.get("output_dir", "outputs/sample_shot"))
+
+    if video_path is not None:
+        input_path = video_path
+        if output_dir is None:
+            output_dir = f"outputs/{Path(video_path).stem}"
+    else:
+        input_path = video_cfg.get("input_path", "data/raw/sample_shot.mp4")
+        if output_dir is None:
+            output_dir = video_cfg.get("output_dir", "outputs/sample_shot")
+
+    output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     debug_dir = output_dir / "debug"
     debug_dir.mkdir(parents=True, exist_ok=True)
@@ -34,9 +53,8 @@ def run_pipeline(config_path: str) -> dict:
     save_every = cfg.get("visualization", {}).get("save_debug_every_n_frames", 10)
     trail_length = cfg.get("tracking", {}).get("trail_length", 60)
 
-    # ------------------------------------------------------------------ #
-    # 1. Load frames
-    # ------------------------------------------------------------------ #
+
+    # load frames
     print(f"Loading frames from: {input_path}")
     frames, meta = load_video_frames(
         input_path,
@@ -48,9 +66,7 @@ def run_pipeline(config_path: str) -> dict:
     fps = meta["fps"]
     print(f"  Loaded {len(frames)} frames  ({meta['resized_size'][0]}×{meta['resized_size'][1]})  @ {fps:.1f} fps")
 
-    # ------------------------------------------------------------------ #
-    # 2. Per-frame detection
-    # ------------------------------------------------------------------ #
+    # per frame detection
     all_candidates: list[list[dict]] = []
     all_masks: list = []
     processed_frames: list = []
@@ -70,15 +86,11 @@ def run_pipeline(config_path: str) -> dict:
         candidates = detect_ball_hsv(proc, cfg)
         all_candidates.append(candidates)
 
-    # ------------------------------------------------------------------ #
-    # 3. Temporal tracking
-    # ------------------------------------------------------------------ #
+    # temporal tracking
     print("Tracking candidates across frames…")
     detections = track_candidates(all_candidates, cfg)
 
-    # ------------------------------------------------------------------ #
-    # 4. Save debug panels
-    # ------------------------------------------------------------------ #
+    # save debug panels
     print(f"Saving debug panels (every {save_every} frames)…")
     for i, (frame_idx, frame, proc, mask, cands, det) in enumerate(
         zip(meta["frame_indices"], frames, processed_frames, all_masks, all_candidates, detections)
@@ -96,9 +108,7 @@ def run_pipeline(config_path: str) -> dict:
                 trail_length=trail_length,
             )
 
-    # ------------------------------------------------------------------ #
-    # 5. Fit trajectory
-    # ------------------------------------------------------------------ #
+    # fit trajectory
     print("Fitting trajectory…")
     fit_cfg = cfg.get("fitting", {})
     _, xs, ys = get_valid_points(detections)
@@ -122,9 +132,7 @@ def run_pipeline(config_path: str) -> dict:
             "success": coeffs is not None,
         }
 
-    # ------------------------------------------------------------------ #
-    # 6. Annotated video
-    # ------------------------------------------------------------------ #
+    # annotated video   
     print("Building annotated video…")
     annotated: list = []
     for i, (frame, det) in enumerate(zip(frames, detections)):
@@ -132,20 +140,14 @@ def run_pipeline(config_path: str) -> dict:
         annotated.append(ann)
     save_video(annotated, str(output_dir / "annotated_video.mp4"), fps)
 
-    # ------------------------------------------------------------------ #
-    # 7. Trajectory plot
-    # ------------------------------------------------------------------ #
+    # trajectory plot
     print("Saving trajectory plot…")
     plot_trajectory(detections, fit_result, str(output_dir / "trajectory_plot.png"))
 
-    # ------------------------------------------------------------------ #
-    # 8. Save detections CSV
-    # ------------------------------------------------------------------ #
+    # save detections CSV
     save_detections_csv(detections, str(output_dir / "detections.csv"))
 
-    # ------------------------------------------------------------------ #
-    # 9. Summary
-    # ------------------------------------------------------------------ #
+    # summary
     track_stats = tracking_summary(detections)
     fit_stats = fit_summary(fit_result)
     summary = {
@@ -161,9 +163,6 @@ def run_pipeline(config_path: str) -> dict:
     with open(output_dir / "summary.json", "w") as f:
         json.dump(summary, f, indent=2)
 
-    # ------------------------------------------------------------------ #
-    # 10. Print summary
-    # ------------------------------------------------------------------ #
     print("\n" + "=" * 50)
     print("PIPELINE SUMMARY")
     print("=" * 50)

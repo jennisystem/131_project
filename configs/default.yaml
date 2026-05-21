@@ -2,7 +2,7 @@ video:
   input_path: "data/raw/sample_shot.mp4"
   output_dir: "outputs/sample_shot"
   resize_width: 960
-  start_frame: 0
+  start_frame: 0 # skip frames before ball enters — tune this
   end_frame: null
   frame_stride: 1
 
@@ -18,8 +18,8 @@ preprocess:
   use_median_blur: true
 
 hsv_threshold:
-  # Starting values for orange basketball detection.
-  # Tune these after looking at debug masks.
+  # *** Starting values for orange basketball detection ***
+  # We need to tune these after looking at debug masks!!!
   lower: [5, 80, 80]
   upper: [25, 255, 255]
 
@@ -28,9 +28,9 @@ morphology:
   close_kernel: 7
 
 contour_filter:
-  min_area: 40
+  min_area: 80
   max_area: 5000
-  min_circularity: 0.35
+  min_circularity: 0.55   # rim/padding is not round; ball is
 
 tracking:
   max_jump_px: 120
