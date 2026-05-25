@@ -1,0 +1,59 @@
+video:
+  input_path: "data/raw/sample_shot2.mp4"
+  output_dir: "outputs/sample_shot2"
+  resize_width: 960
+  start_frame: 52
+  end_frame: null
+  frame_stride: 1
+
+roi:
+  use_roi: false
+  x: 0
+  y: 0
+  w: 960
+  h: 540
+
+preprocess:
+  blur_kernel: 5
+  use_median_blur: true
+
+detection_mask:
+  use_mask: true
+  outside_mode: black
+  keep_regions:
+    - {x: 250, y: 0, w: 710, h: 420}
+
+hsv_threshold:
+  # sample_shot2 has a dark ball with colored patches.
+  # This wider warm-color range catches the visible orange/yellow/red patches.
+  lower: [0, 50, 50]
+  upper: [35, 255, 255]
+
+morphology:
+  open_kernel: 3
+  close_kernel: 7
+
+contour_filter:
+  min_area: 70
+  max_area: 7000
+  ideal_area: 500
+  min_circularity: 0.35
+  min_x: 250
+  max_y: 420
+  min_radius: 5
+  max_radius: 55
+
+tracking:
+  max_jump_px: 260
+  allow_missing_frames: true
+  reacquire_after_missing: 5
+  trail_length: 80
+
+fitting:
+  use_ransac: true
+  ransac_iterations: 300
+  ransac_threshold_px: 20
+  min_inliers: 8
+
+visualization:
+  save_debug_every_n_frames: 10

@@ -2,7 +2,7 @@ video:
   input_path: "data/raw/sample_shot.mp4"
   output_dir: "outputs/sample_shot"
   resize_width: 960
-  start_frame: 0 # skip frames before ball enters — tune this
+  start_frame: 0
   end_frame: null
   frame_stride: 1
 
@@ -17,28 +17,25 @@ preprocess:
   blur_kernel: 5
   use_median_blur: true
 
+detection_mask:
+  use_mask: false
+
 hsv_threshold:
-  # sample_shot3 uses a red/white ball, so red needs two HSV ranges.
-  # Orange ball starting range: lower: [5, 80, 80], upper: [25, 255, 255]
-  lower: [[0, 60, 40], [165, 60, 40]]
-  upper: [[20, 255, 255], [179, 255, 255]]
+  lower: [5, 80, 80]
+  upper: [25, 255, 255]
 
 morphology:
   open_kernel: 3
   close_kernel: 7
 
 contour_filter:
-  min_area: 100
-  max_area: 15000
-  ideal_area: 6500
-  min_circularity: 0.15 # motion blur makes this ball less circular
-  min_x: 250
-  max_y: 650 # ignore lower rim/background candidates in sample_shot3
-  min_radius: 10
-  max_radius: 90
+  min_area: 80
+  max_area: 5000
+  ideal_area: 500
+  min_circularity: 0.55
 
 tracking:
-  max_jump_px: 220
+  max_jump_px: 120
   allow_missing_frames: true
   reacquire_after_missing: 5
   trail_length: 60

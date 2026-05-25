@@ -11,6 +11,18 @@ def make_hsv_mask(
 ) -> np.ndarray:
     """Return a binary mask isolating pixels within the HSV range."""
     hsv = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2HSV)
+
+    # Red hues wrap around OpenCV's HSV scale, so allow multiple ranges:
+    # lower: [[0, 25, 35], [165, 25, 35]]
+    # upper: [[15, 255, 255], [179, 255, 255]]
+    if lower and isinstance(lower[0], list):
+        mask = np.zeros(hsv.shape[:2], dtype=np.uint8)
+        for lo_vals, hi_vals in zip(lower, upper):
+            lo = np.array(lo_vals, dtype=np.uint8)
+            hi = np.array(hi_vals, dtype=np.uint8)
+            mask = cv2.bitwise_or(mask, cv2.inRange(hsv, lo, hi))
+        return mask
+
     lo = np.array(lower, dtype=np.uint8)
     hi = np.array(upper, dtype=np.uint8)
     return cv2.inRange(hsv, lo, hi)
@@ -71,13 +83,34 @@ def filter_candidates(
     min_area: float,
     max_area: float,
     min_circularity: float,
+    min_x: float | None = None,
+    max_x: float | None = None,
+    min_y: float | None = None,
+    max_y: float | None = None,
+    min_radius: float | None = None,
+    max_radius: float | None = None,
 ) -> list[dict]:
     """Keep only candidates meeting area and circularity thresholds."""
-    return [
-        c
-        for c in candidates
-        if min_area <= c["area"] <= max_area and c["circularity"] >= min_circularity
-    ]
+    filtered = []
+    for c in candidates:
+        if not (min_area <= c["area"] <= max_area):
+            continue
+        if c["circularity"] < min_circularity:
+            continue
+        if min_x is not None and c["x"] < min_x:
+            continue
+        if max_x is not None and c["x"] > max_x:
+            continue
+        if min_y is not None and c["y"] < min_y:
+            continue
+        if max_y is not None and c["y"] > max_y:
+            continue
+        if min_radius is not None and c["radius"] < min_radius:
+            continue
+        if max_radius is not None and c["radius"] > max_radius:
+            continue
+        filtered.append(c)
+    return filtered
 
 
 def _score_candidate(candidate: dict, ideal_area: float = 500.0) -> float:
@@ -113,8 +146,15 @@ def detect_ball_hsv(frame_bgr: np.ndarray, config: dict) -> list[dict]:
         min_area=filt_cfg.get("min_area", 40),
         max_area=filt_cfg.get("max_area", 5000),
         min_circularity=filt_cfg.get("min_circularity", 0.35),
+        min_x=filt_cfg.get("min_x"),
+        max_x=filt_cfg.get("max_x"),
+        min_y=filt_cfg.get("min_y"),
+        max_y=filt_cfg.get("max_y"),
+        min_radius=filt_cfg.get("min_radius"),
+        max_radius=filt_cfg.get("max_radius"),
     )
+    ideal_area = filt_cfg.get("ideal_area", 500.0)
     for c in candidates:
-        c["score"] = _score_candidate(c)
+        c["score"] = _score_candidate(c, ideal_area=ideal_area)
     candidates.sort(key=lambda c: c["score"], reverse=True)
     return candidates

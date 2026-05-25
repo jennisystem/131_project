@@ -72,12 +72,20 @@ def track_candidates(
     """
     track_cfg = config.get("tracking", {})
     max_jump = track_cfg.get("max_jump_px", 120)
+    reacquire_after_missing = track_cfg.get("reacquire_after_missing", 8)
 
     detections: list[dict] = []
     history: list[dict] = []
 
     for frame_idx, candidates in enumerate(all_candidates):
         predicted = predict_next_position(history)
+        recent_missing = 0
+        for det in reversed(history):
+            if det.get("x") is not None:
+                break
+            recent_missing += 1
+        if recent_missing >= reacquire_after_missing:
+            predicted = None
 
         # On the very first frame with no history, pick highest-scoring candidate.
         if predicted is None:

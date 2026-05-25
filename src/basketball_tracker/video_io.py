@@ -1,6 +1,8 @@
 """Video loading, frame saving, and CSV output utilities."""
 
 import csv
+import shutil
+import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -79,6 +81,29 @@ def save_video(frames: list[np.ndarray], output_path: str, fps: float) -> None:
     for frame in frames:
         writer.write(frame)
     writer.release()
+
+
+def save_vscode_video(input_path: str, output_path: str) -> bool:
+    """Convert an MP4 to H.264 so VS Code's preview can open it."""
+    if shutil.which("ffmpeg") is None:
+        return False
+
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    command = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        str(input_path),
+        "-c:v",
+        "libx264",
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
+        str(output_path),
+    ]
+    result = subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return result.returncode == 0
 
 
 def save_detections_csv(detections: list[dict], output_path: str) -> None:

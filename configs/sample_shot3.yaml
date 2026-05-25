@@ -1,8 +1,8 @@
 video:
-  input_path: "data/raw/sample_shot.mp4"
-  output_dir: "outputs/sample_shot"
+  input_path: "data/raw/sample_shot3.mp4"
+  output_dir: "outputs/sample_shot3"
   resize_width: 960
-  start_frame: 0 # skip frames before ball enters — tune this
+  start_frame: 61
   end_frame: null
   frame_stride: 1
 
@@ -17,9 +17,24 @@ preprocess:
   blur_kernel: 5
   use_median_blur: true
 
+detection_mask:
+  use_mask: true
+  outside_mode: black
+  keep_regions:
+    - {x: 250, y: 0, w: 710, h: 650}
+
+background_suppression:
+  use_suppression: true
+  mode: black
+  # Remove the lower dark-red bleachers/background before red-ball detection.
+  # Keep this spatially restricted so the ball itself is not erased up top.
+  lower: [[0, 80, 0], [165, 80, 0]]
+  upper: [[20, 255, 115], [179, 255, 115]]
+  regions:
+    - {x: 250, y: 520, w: 710, h: 130}
+
 hsv_threshold:
   # sample_shot3 uses a red/white ball, so red needs two HSV ranges.
-  # Orange ball starting range: lower: [5, 80, 80], upper: [25, 255, 255]
   lower: [[0, 60, 40], [165, 60, 40]]
   upper: [[20, 255, 255], [179, 255, 255]]
 
@@ -31,9 +46,9 @@ contour_filter:
   min_area: 100
   max_area: 15000
   ideal_area: 6500
-  min_circularity: 0.15 # motion blur makes this ball less circular
+  min_circularity: 0.15
   min_x: 250
-  max_y: 650 # ignore lower rim/background candidates in sample_shot3
+  max_y: 650
   min_radius: 10
   max_radius: 90
 

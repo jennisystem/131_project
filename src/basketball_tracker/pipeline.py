@@ -9,7 +9,7 @@ from .fit import get_valid_points, fit_parabola_xy, ransac_parabola
 from .metrics import tracking_summary, fit_summary
 from .preprocess import prepare_frame
 from .track import track_candidates
-from .video_io import load_video_frames, save_video, save_detections_csv
+from .video_io import load_video_frames, save_video, save_vscode_video, save_detections_csv
 from .visualize import annotate_frame, plot_trajectory, save_debug_frame
 
 
@@ -138,7 +138,13 @@ def run_pipeline(
     for i, (frame, det) in enumerate(zip(frames, detections)):
         ann = annotate_frame(frame, meta["frame_indices"][i], det, detections[: i + 1], trail_length)
         annotated.append(ann)
-    save_video(annotated, str(output_dir / "annotated_video.mp4"), fps)
+    annotated_path = output_dir / "annotated_video.mp4"
+    vscode_path = output_dir / "annotated_video_h264.mp4"
+    save_video(annotated, str(annotated_path), fps)
+    if save_vscode_video(str(annotated_path), str(vscode_path)):
+        print(f"Saved VS Code-friendly video: {vscode_path}")
+    else:
+        print("Skipping VS Code-friendly video: ffmpeg is not available.")
 
     # trajectory plot
     print("Saving trajectory plot…")
