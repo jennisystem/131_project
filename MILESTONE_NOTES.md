@@ -9,18 +9,22 @@ thresholding to isolate orange basketball-like pixels, cleans the mask using
 morphological operations, and extracts contour-based ball candidates. Candidate
 regions are filtered by area and circularity, then linked across frames using a
 simple motion-continuity tracker. We also implemented preliminary parabolic
-trajectory fitting using least squares and RANSAC.
+trajectory fitting using least squares and RANSAC. Since the initial version,
+we tested the pipeline on two additional sample shots to see how well the same
+thresholding, filtering, and tracking steps generalize across different shot
+examples.
 
 ## Visualization and Results
 
 The current debug outputs include side-by-side panels showing the original
 frame, HSV mask, contour candidates, and selected ball detection. These
 visualizations help show where the pipeline works and where it fails. In early
-tests, HSV thresholding is most successful when the ball is separated from the
-player's body and background. The main failure cases are motion blur, occlusion
-near the player's hands, and false positives from similarly colored objects such
-as the rim or background. The trajectory plot shows raw tracked centers and a
-fitted parabolic arc, giving an initial visualization of the shot path.
+tests across the original video and two additional sample shots, HSV
+thresholding is most successful when the ball is separated from the player's
+body and background. The main failure cases are motion blur, occlusion near the
+player's hands, and false positives from similarly colored objects such as the
+rim or background. The trajectory plot shows raw tracked centers and a fitted
+parabolic arc, giving an initial visualization of the shot path.
 
 ## Updated Timeline and Plan
 
@@ -46,6 +50,7 @@ limitations.
 - Annotated video output working
 - Trajectory plot (inverted y-axis, inlier/outlier coded) working
 - Quantitative summary JSON working
+- Tested the pipeline on two additional sample shots
 
 ## Next Steps
 
