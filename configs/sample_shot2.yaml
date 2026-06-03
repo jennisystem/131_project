@@ -21,7 +21,7 @@ detection_mask:
   use_mask: true
   outside_mode: black
   keep_regions:
-    - {x: 250, y: 0, w: 710, h: 420}
+    - { x: 250, y: 0, w: 710, h: 420 }
 
 hsv_threshold:
   # sample_shot2 has a dark ball with colored patches.
@@ -40,7 +40,7 @@ contour_filter:
   min_circularity: 0.35
   min_x: 250
   max_y: 420
-  min_radius: 5
+  min_radius: 15
   max_radius: 55
 
 tracking:
@@ -57,3 +57,4 @@ fitting:
 
 visualization:
   save_debug_every_n_frames: 10
+  use_processed_frames: true

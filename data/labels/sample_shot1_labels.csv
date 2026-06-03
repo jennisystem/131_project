@@ -1,0 +1,9 @@
+video,frame_idx,x,y,radius
+sample_shot1,0,590,85,42
+sample_shot1,12,349,189,41
+sample_shot1,22,266,123,41
+sample_shot1,34,260,131,40
+sample_shot1,44,326,212,41
+sample_shot1,56,377,222,40
+sample_shot1,76,439,408,41
+sample_shot1,100,,,

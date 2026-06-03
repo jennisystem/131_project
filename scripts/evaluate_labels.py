@@ -36,11 +36,21 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate detections against manual labels.")
     parser.add_argument("--detections", required=True, help="Path to detections CSV.")
     parser.add_argument("--labels", required=True, help="Path to labels CSV.")
+    parser.add_argument(
+        "--success-threshold-px",
+        type=float,
+        default=30.0,
+        help="Maximum center error counted as a successful labeled-frame track.",
+    )
     args = parser.parse_args()
 
     detections = load_detections_csv(args.detections)
     labels = load_labels(args.labels)
-    result = evaluate_against_labels(detections, labels)
+    result = evaluate_against_labels(
+        detections,
+        labels,
+        success_threshold_px=args.success_threshold_px,
+    )
 
     print("\nEvaluation Results")
     print("==================")

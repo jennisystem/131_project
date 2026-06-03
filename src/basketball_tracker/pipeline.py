@@ -89,6 +89,8 @@ def run_pipeline(
     # temporal tracking
     print("Tracking candidates across frames…")
     detections = track_candidates(all_candidates, cfg)
+    for det, frame_idx in zip(detections, meta["frame_indices"]):
+        det["frame_idx"] = frame_idx
 
     # save debug panels
     print(f"Saving debug panels (every {save_every} frames)…")
@@ -134,8 +136,13 @@ def run_pipeline(
 
     # annotated video   
     print("Building annotated video…")
+    annotation_frames = (
+        processed_frames
+        if cfg.get("visualization", {}).get("use_processed_frames", False)
+        else frames
+    )
     annotated: list = []
-    for i, (frame, det) in enumerate(zip(frames, detections)):
+    for i, (frame, det) in enumerate(zip(annotation_frames, detections)):
         ann = annotate_frame(frame, meta["frame_indices"][i], det, detections[: i + 1], trail_length)
         annotated.append(ann)
     annotated_path = output_dir / "annotated_video.mp4"

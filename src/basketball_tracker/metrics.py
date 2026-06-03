@@ -60,30 +60,36 @@ def load_labels(label_csv_path: str) -> list[dict]:
 
 
 def evaluate_against_labels(
-    detections: list[dict], labels: list[dict]
+    detections: list[dict], labels: list[dict], success_threshold_px: float = 30.0
 ) -> dict:
     """Compare predicted centers to manually labeled centers.
 
-    Returns mean and median center error in pixels (only for labeled frames
-    that were also tracked).
+    Returns center-error statistics for tracked labeled frames and a success
+    rate over all visible-ball labeled frames.
     """
     det_by_frame = {d["frame_idx"]: d for d in detections}
     errors = []
+    visible_labels = 0
+    successful = 0
     for lbl in labels:
         if lbl.get("x") is None or lbl.get("y") is None:
             continue
+        visible_labels += 1
         frame_idx = lbl["frame_idx"]
         det = det_by_frame.get(frame_idx)
         if det is None or det.get("x") is None:
             continue
         err = np.hypot(det["x"] - lbl["x"], det["y"] - lbl["y"])
         errors.append(err)
-
-    if not errors:
-        return {"labeled_frames_evaluated": 0, "mean_center_error_px": None, "median_center_error_px": None}
+        if err <= success_threshold_px:
+            successful += 1
 
     return {
+        "visible_labeled_frames": visible_labels,
         "labeled_frames_evaluated": len(errors),
-        "mean_center_error_px": round(float(np.mean(errors)), 2),
-        "median_center_error_px": round(float(np.median(errors)), 2),
+        "mean_center_error_px": round(float(np.mean(errors)), 2) if errors else None,
+        "median_center_error_px": round(float(np.median(errors)), 2) if errors else None,
+        "label_success_threshold_px": success_threshold_px,
+        "label_successful_frames": successful,
+        "label_success_rate": round(100.0 * successful / visible_labels, 1) if visible_labels else None,
     }
