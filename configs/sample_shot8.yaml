@@ -1,0 +1,57 @@
+video:
+  input_path: "data/raw/sample_shot8.mp4"
+  output_dir: "outputs/sample_shot8"
+  resize_width: 960
+  start_frame: 25
+  end_frame: 86
+  frame_stride: 1
+
+roi:
+  use_roi: false
+  x: 0
+  y: 0
+  w: 960
+  h: 540
+
+preprocess:
+  blur_kernel: 5
+  use_median_blur: true
+
+detection_mask:
+  use_mask: true
+  outside_mode: black
+  keep_regions:
+    - { x: 360, y: 0, w: 300, h: 540 }
+
+hsv_threshold:
+  lower: [0, 45, 45]
+  upper: [28, 255, 255]
+
+morphology:
+  open_kernel: 3
+  close_kernel: 7
+
+contour_filter:
+  min_area: 1500
+  max_area: 20000
+  ideal_area: 7000
+  min_circularity: 0.2
+  min_x: 360
+  max_x: 660
+  min_radius: 30
+  max_radius: 90
+
+tracking:
+  max_jump_px: 180
+  allow_missing_frames: true
+  reacquire_after_missing: 4
+  trail_length: 70
+
+fitting:
+  use_ransac: true
+  ransac_iterations: 300
+  ransac_threshold_px: 25
+  min_inliers: 8
+
+visualization:
+  save_debug_every_n_frames: 10

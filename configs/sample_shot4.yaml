@@ -1,9 +1,9 @@
 video:
-  input_path: "data/raw/sample_shot2.mp4"
-  output_dir: "outputs/sample_shot2"
+  input_path: "data/raw/sample_shot4.mp4"
+  output_dir: "outputs/sample_shot4"
   resize_width: 960
-  start_frame: 52
-  end_frame: null
+  start_frame: 25
+  end_frame: 95
   frame_stride: 1
 
 roi:
@@ -21,29 +21,28 @@ detection_mask:
   use_mask: true
   outside_mode: black
   keep_regions:
-    - { x: 250, y: 0, w: 710, h: 420 }
+    - { x: 0, y: 0, w: 960, h: 540 }
 
 hsv_threshold:
-  # sample_shot2 has a dark ball with colored patches.
-  lower: [0, 50, 50]
-  upper: [35, 255, 255]
+  # Dark studio background with a standard orange ball.
+  lower: [3, 55, 35]
+  upper: [28, 255, 255]
 
 morphology:
   open_kernel: 3
-  close_kernel: 7
+  close_kernel: 9
 
 contour_filter:
-  min_area: 70
-  max_area: 7000
-  ideal_area: 500
-  min_circularity: 0.35
-  min_x: 250
-  max_y: 420
-  min_radius: 15
-  max_radius: 55
+  min_area: 250
+  max_area: 30000
+  ideal_area: 9000
+  min_circularity: 0.25
+  max_y: 220
+  min_radius: 18
+  max_radius: 120
 
 tracking:
-  max_jump_px: 260
+  max_jump_px: 110
   allow_missing_frames: true
   reacquire_after_missing: 5
   trail_length: 80
@@ -51,9 +50,8 @@ tracking:
 fitting:
   use_ransac: true
   ransac_iterations: 300
-  ransac_threshold_px: 20
+  ransac_threshold_px: 25
   min_inliers: 8
 
 visualization:
   save_debug_every_n_frames: 10
-  use_processed_frames: true

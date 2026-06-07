@@ -26,8 +26,6 @@ detection_mask:
 background_suppression:
   use_suppression: true
   mode: black
-  # Remove the lower dark-red bleachers/background before red-ball detection.
-  # Keep this spatially restricted so the ball itself is not erased up top.
   lower: [[0, 80, 0], [165, 80, 0]]
   upper: [[20, 255, 115], [179, 255, 115]]
   regions:

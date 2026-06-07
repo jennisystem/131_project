@@ -1,0 +1,59 @@
+video:
+  input_path: "data/raw/sample_shot5.mp4"
+  output_dir: "outputs/sample_shot5"
+  resize_width: 960
+  start_frame: 4
+  end_frame: 31
+  frame_stride: 1
+
+roi:
+  use_roi: false
+  x: 0
+  y: 0
+  w: 960
+  h: 540
+
+preprocess:
+  blur_kernel: 5
+  use_median_blur: true
+
+detection_mask:
+  use_mask: true
+  outside_mode: black
+  keep_regions:
+    - { x: 120, y: 0, w: 720, h: 540 }
+
+hsv_threshold:
+  # Low-key clip: keep a broad warm range for the shadowed ball.
+  lower: [0, 35, 25]
+  upper: [35, 255, 230]
+
+morphology:
+  open_kernel: 3
+  close_kernel: 9
+
+contour_filter:
+  min_area: 250
+  max_area: 18000
+  ideal_area: 6000
+  min_circularity: 0.18
+  min_x: 120
+  max_x: 840
+  min_radius: 15
+  max_radius: 95
+
+tracking:
+  max_jump_px: 140
+  allow_missing_frames: true
+  reacquire_after_missing: 4
+  trail_length: 50
+
+fitting:
+  use_ransac: true
+  ransac_iterations: 300
+  ransac_threshold_px: 30
+  min_inliers: 6
+
+visualization:
+  save_debug_every_n_frames: 5
+

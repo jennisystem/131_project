@@ -37,10 +37,14 @@ pip install -r requirements.txt
 
 ## Data Setup
 
-Place short side-view phone videos in `data/raw/`. The default config expects:
+Place short side-view phone videos in `data/raw/`. This project currently uses
+ten sample clips:
 
 ```
 data/raw/sample_shot.mp4
+data/raw/sample_shot2.mp4
+...
+data/raw/sample_shot10.mp4
 ```
 
 ---
@@ -50,6 +54,15 @@ data/raw/sample_shot.mp4
 ```bash
 python scripts/run_pipeline.py --config configs/default.yaml
 ```
+
+To regenerate all tuned sample results:
+
+```bash
+python scripts/run_all_samples.py
+```
+
+The per-video configs are stored in `configs/sample_shot1.yaml` through
+`configs/sample_shot10.yaml`.
 
 ---
 
@@ -129,15 +142,16 @@ Then re-run and inspect `outputs/sample_shot/debug/` to see how the mask changes
 - Annotated video output
 - Trajectory plot (inverted y-axis, inlier/outlier colour coding)
 - Quantitative summary JSON
+- Per-video tuned configs for ten sample shots
 
 ### Current failure cases
 - Motion blur during fast release causes spread or missing detections
 - Ball near player's hands (skin tone / jersey) may fail HSV filter
 - Orange-coloured backgrounds or rims can cause false positives
 - Large jumps (fast pan or fast ball) can exceed `max_jump_px` and break track
+- Heavy rim/net occlusion can merge the ball with similarly colored structures
 
 ### Next steps
-- Tune HSV thresholds and contour filters on multiple videos
 - Add radius consistency check in tracker
-- Manually label a subset of frames for quantitative evaluation
+- Manually label the seven additional sample shots for center-error evaluation
 - Explore optional Canny/Hough circle comparison

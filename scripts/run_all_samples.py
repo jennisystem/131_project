@@ -12,6 +12,13 @@ CONFIGS = [
     "configs/sample_shot1.yaml",
     "configs/sample_shot2.yaml",
     "configs/sample_shot3.yaml",
+    "configs/sample_shot4.yaml",
+    "configs/sample_shot5.yaml",
+    "configs/sample_shot6.yaml",
+    "configs/sample_shot7.yaml",
+    "configs/sample_shot8.yaml",
+    "configs/sample_shot9.yaml",
+    "configs/sample_shot10.yaml",
 ]
 
 
